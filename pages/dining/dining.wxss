@@ -1,0 +1,314 @@
+/* TripMate 吃喝探索 —— 风格与首页一致：背景 #FAF9F6、白卡圆角 32rpx、主题色 #7C9C7E */
+.page {
+  min-height: 100vh;
+  background: #FAF9F6;
+  padding: 32rpx 32rpx 60rpx;
+  box-sizing: border-box;
+}
+
+/* 顶部标题：30rpx 加粗 #333 */
+.header {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 28rpx;
+}
+.header-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #333;
+}
+.stats {
+  font-size: 24rpx;
+  color: #7C9C7E;
+}
+.subtitle {
+  font-size: 26rpx;
+  color: #999;
+  margin-top: 8rpx;
+}
+
+/* 功能 1：今天吃啥抽签卡（主题色 12% 透明度底） */
+.pick-card {
+  background: rgba(124, 156, 126, 0.12);
+  border-radius: 32rpx;
+  padding: 30rpx;
+  margin-bottom: 28rpx;
+}
+.pick-head {
+  display: flex;
+  flex-direction: column;
+}
+.pick-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #333;
+}
+.pick-sub {
+  font-size: 24rpx;
+  color: #888;
+  margin-top: 6rpx;
+}
+.pick-result {
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 24rpx;
+  margin: 20rpx 0;
+  display: flex;
+  flex-direction: column;
+}
+.pick-name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #7C9C7E;
+}
+.pick-meta {
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 8rpx;
+}
+.pick-empty {
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 24rpx;
+  margin: 20rpx 0;
+  font-size: 24rpx;
+  color: #aaa;
+}
+.pick-actions {
+  display: flex;
+  gap: 16rpx;
+}
+.pick-btn {
+  flex: 1;
+  border-radius: 16rpx;
+  font-size: 26rpx;
+  font-weight: 500;
+}
+.pick-btn.main {
+  background: #7C9C7E;
+  color: #fff;
+}
+.pick-btn.ghost {
+  background: #fff;
+  color: #7C9C7E;
+  border: 2rpx solid #7C9C7E;
+}
+.pick-btn.main::after,
+.pick-btn.ghost::after {
+  border: none;
+}
+.pick-btn[disabled] {
+  opacity: 0.5;
+  color: #7C9C7E;
+  background: #fff;
+}
+
+/* 功能 2：类型筛选 chips */
+.chips {
+  white-space: nowrap;
+  margin-bottom: 24rpx;
+}
+.chip {
+  display: inline-block;
+  background: #fff;
+  color: #666;
+  font-size: 24rpx;
+  border-radius: 999rpx;
+  padding: 10rpx 28rpx;
+  margin-right: 12rpx;
+  border: 2rpx solid #ececec;
+}
+.chip-on {
+  background: #7C9C7E;
+  color: #fff;
+  border-color: #7C9C7E;
+}
+
+/* 店铺列表：白底卡片、圆角 32rpx、柔和阴影 */
+.shop-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+  margin-bottom: 32rpx;
+}
+.empty {
+  background: #fff;
+  border-radius: 32rpx;
+  padding: 60rpx 30rpx;
+  text-align: center;
+  color: #aaa;
+  font-size: 26rpx;
+  box-shadow: 0 4rpx 16rpx rgba(51, 51, 51, 0.04);
+}
+.shop-card {
+  background: #fff;
+  border-radius: 32rpx;
+  padding: 30rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4rpx 16rpx rgba(51, 51, 51, 0.04);
+}
+.shop-card.visited {
+  opacity: 0.6;
+}
+.shop-main {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  margin-right: 20rpx;
+}
+.shop-top {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+.shop-name {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333;
+}
+.shop-card.visited .shop-name {
+  text-decoration: line-through;
+  color: #bbb;
+}
+/* 类型标签：主题色 12% 透明度底色 */
+.shop-type {
+  font-size: 22rpx;
+  color: #7C9C7E;
+  background: rgba(124, 156, 126, 0.12);
+  border-radius: 10rpx;
+  padding: 4rpx 14rpx;
+}
+.shop-address {
+  font-size: 26rpx;
+  color: #888;
+  margin-top: 10rpx;
+}
+.visited-badge {
+  margin-top: 12rpx;
+  align-self: flex-start;
+  font-size: 22rpx;
+  color: #7C9C7E;
+  background: rgba(124, 156, 126, 0.12);
+  border-radius: 10rpx;
+  padding: 4rpx 14rpx;
+}
+
+/* 去过按钮：主题色描边，标记后变灰 */
+.visited-btn {
+  background: #fff;
+  color: #7C9C7E;
+  border: 2rpx solid #7C9C7E;
+  border-radius: 30rpx;
+  font-size: 24rpx;
+  padding: 0 28rpx;
+  line-height: 2.2;
+}
+.visited-btn.on {
+  background: #f2f2f2;
+  color: #999;
+  border-color: #e0e0e0;
+}
+
+/* 添加表单 */
+.form {
+  background: #fff;
+  border-radius: 32rpx;
+  padding: 32rpx 30rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+  box-shadow: 0 4rpx 16rpx rgba(51, 51, 51, 0.04);
+  margin-bottom: 32rpx;
+}
+.form-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #333;
+}
+.input {
+  background: #FAF9F6;
+  border-radius: 20rpx;
+  padding: 22rpx 26rpx;
+  font-size: 28rpx;
+  color: #333;
+}
+.picker {
+  background: #FAF9F6;
+  border-radius: 20rpx;
+  padding: 22rpx 26rpx;
+  font-size: 28rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.picker-label {
+  color: #999;
+  font-size: 26rpx;
+}
+.picker-value {
+  color: #333;
+}
+/* 主按钮：主题色 #7C9C7E */
+.add-btn {
+  background: #7C9C7E;
+  color: #fff;
+  border-radius: 20rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+}
+.add-btn::after {
+  border: none;
+}
+
+/* 功能 3：灵感发现（虚线卡片 = 还不是我的店） */
+.ideas-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 20rpx;
+}
+.ideas-sub {
+  font-size: 22rpx;
+  color: #999;
+  font-weight: 400;
+  margin-left: 12rpx;
+}
+.idea-card {
+  background: #fff;
+  border: 2rpx dashed #d8d8d8;
+  border-radius: 32rpx;
+  padding: 28rpx 30rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
+}
+.idea-main {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  margin-right: 20rpx;
+}
+.idea-meta {
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 10rpx;
+}
+.idea-add {
+  background: #7C9C7E;
+  color: #fff;
+  border-radius: 999rpx;
+  font-size: 24rpx;
+  padding: 0 28rpx;
+}
+.idea-add::after {
+  border: none;
+}
+

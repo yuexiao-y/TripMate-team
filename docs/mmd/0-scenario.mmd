@@ -1,0 +1,29 @@
+%%{init: {"themeVariables": {"fontSize": "20px", "primaryColor": "#f2f2f2", "primaryBorderColor": "#999999", "clusterBkg": "#fafafa", "clusterBorder": "#bbbbbb", "lineColor": "#666666"}, "flowchart": {"nodeSpacing": 24, "rankSpacing": 60, "padding": 10}}}%%
+flowchart LR
+    User((旅行<br/>用户))
+
+    subgraph S1[① 行前规划]
+        direction TB
+        UC1[UC1 智能规划行程]
+        UC7[UC7 出行清单]
+    end
+
+    subgraph S2[② 行程管理]
+        direction TB
+        UC2[UC2 管理行程]
+        UC3[UC3 记录交通]
+    end
+
+    subgraph S3[③ 途中记录]
+        direction TB
+        UC4[UC4 预算记账分摊]
+        UC5[UC5 吃喝记录]
+        UC6[UC6 旅行打卡]
+    end
+
+    S4[④ UC8<br/>首页统计汇总]
+
+    User --> S1
+    S1 -- 保存为行程 --> S2
+    S2 -- 提供行程上下文 --> S3
+    S1 & S3 -. 数据聚合 .-> S4

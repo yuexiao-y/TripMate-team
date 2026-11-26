@@ -1,0 +1,25 @@
+%%{init: {"themeVariables": {"fontSize": "18px", "primaryColor": "#f2f2f2", "primaryBorderColor": "#999999", "clusterBkg": "#fafafa", "clusterBorder": "#bbbbbb", "lineColor": "#666666"}, "flowchart": {"nodeSpacing": 24, "rankSpacing": 60}}}%%
+flowchart LR
+    subgraph Repo[源码目录结构]
+        direction LR
+        APPJS[app.js / app.json<br/>全局入口·配置]
+
+        subgraph Pages[pages/ —— 各负责人自治模块]
+            direction TB
+            P_HOME[home · ai]
+            P_MID[itinerary · transport<br/>expense · dining]
+            P_END[checkin · checklist]
+        end
+
+        subgraph Shared[utils/ —— 共享层（公共文件禁止改动）]
+            direction TB
+            U_CORE[store.js ★ 数据契约<br/>models.js ★ 实体定义]
+            U_AGENT[agent-engine.js · agent-data.js<br/>本地规则引擎 + 演示数据]
+            U_MISC[ai-cloud.js · format.js]
+        end
+
+        COMP[components/：card<br/>navigation-bar（薄组件）<br/>assets/：字体·图标]
+    end
+
+    APPJS --> Shared
+    Pages -->|import| Shared

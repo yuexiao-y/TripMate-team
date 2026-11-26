@@ -1,0 +1,325 @@
+<!--pages/expense/expense.wxml——预算记账主页（明细列表 + 分类统计 + 结算 + 记一笔弹层）-->
+<view class="page">
+
+  <!-- 无行程引导 -->
+  <block wx:if="{{!hasTrip}}">
+    <view class="empty-hero">
+      <view class="empty-emoji icon-receipt"></view>
+      <view class="empty-title">还没有行程</view>
+      <view class="empty-desc">创建行程后就能开始记账啦</view>
+      <button class="btn-main empty-btn" bindtap="createDefaultTrip">一键创建默认行程</button>
+      <view class="empty-tip">也可以先去首页「行程」里创建，再回到这里记账</view>
+    </view>
+  </block>
+
+  <block wx:else>
+    <!-- 行程条：行程名 + 第 N 天 -->
+    <view class="trip-bar">
+      <picker wx:if="{{tripCount > 1}}" range="{{tripNames}}" value="{{tripIndex}}" bindchange="onTripChange">
+        <view class="trip-picker">{{tripName}} <text class="trip-arrow">▾</text></view>
+      </picker>
+      <view wx:else class="trip-picker">{{tripName}}</view>
+      <view class="day-badge" wx:if="{{dayText}}">{{dayText}}</view>
+    </view>
+
+    <!-- 汇总卡（我的花费 / 总花费 一键切换，默认「我的」） -->
+    <view class="summary-card">
+      <view class="summary-left">
+        <view class="summary-head">
+          <view class="summary-label">{{spendLabel}}</view>
+          <view class="view-switch">
+            <view class="vs-btn {{myView ? 'vs-on' : ''}}" bindtap="setSpendView" data-view="my">我的</view>
+            <view class="vs-btn {{!myView ? 'vs-on' : ''}}" bindtap="setSpendView" data-view="all">全部</view>
+          </view>
+        </view>
+        <view class="summary-amount {{!myView && overBudget ? 'amount-over' : ''}}">{{spendText}}</view>
+        <view class="summary-sub">{{spendSub}}</view>
+      </view>
+      <view class="budget-remain {{overBudget ? 'over' : ''}}" wx:if="{{budget > 0}}" bindtap="setBudget">
+        {{overBudget ? '已超支 ' + overText : '剩余 ' + remainText}}
+      </view>
+    </view>
+
+    <!-- Tab 切换 -->
+    <view class="tabs">
+      <view class="tab {{activeTab === 'list' ? 'tab-active' : ''}}" bindtap="onTabChange" data-tab="list">明细</view>
+      <view class="tab {{activeTab === 'stats' ? 'tab-active' : ''}}" bindtap="onTabChange" data-tab="stats">统计</view>
+      <view class="tab {{activeTab === 'settle' ? 'tab-active' : ''}}" bindtap="onTabChange" data-tab="settle">结算</view>
+    </view>
+
+    <!-- ===== 明细 ===== -->
+    <block wx:if="{{activeTab === 'list'}}">
+      <view class="toolbar">
+        <picker mode="date" value="{{filterDate || today}}" bindchange="onFilterDate">
+          <view class="tool-chip {{filterDate ? '' : 'ghost'}}">{{filterDate || '全部日期'}}</view>
+        </picker>
+        <view class="tool-chip ghost" wx:if="{{filterDate}}" bindtap="clearFilter">清除</view>
+        <view class="tool-spacer"></view>
+        <view class="tool-chip {{orderMode === 'time' ? '' : 'ghost'}}" bindtap="setOrderTime">按时间</view>
+        <view class="tool-chip {{orderMode === 'amount' ? '' : 'ghost'}}" bindtap="setOrderAmount">按金额</view>
+      </view>
+
+      <!-- 按日期分组的列表 -->
+      <view class="date-group" wx:for="{{groups}}" wx:key="date" wx:for-item="g">
+        <view class="group-head">
+          <text class="group-date">{{g.dateText}}</text>
+          <text class="group-total">小计 {{g.totalText}}</text>
+        </view>
+        <view class="exp-card">
+          <view class="swipe-wrap" wx:for="{{g.items}}" wx:key="id" wx:for-item="it">
+            <view class="swipe-del" data-id="{{it.id}}" catchtap="onDeleteTap">删除</view>
+            <view class="swipe-content {{openId === it.id ? 'swiped' : ''}}"
+                  data-id="{{it.id}}"
+                  bindtouchstart="onTouchStart"
+                  bindtouchend="onTouchEnd"
+                  bindtap="onItemTap">
+              <view class="exp-row">
+                <view class="cat-icon cat-{{it.id}}"></view>
+                <view class="exp-info">
+                  <view class="exp-title">
+                    {{it.categoryName}}
+                    <text class="aa-badge" wx:if="{{it.aa}}">AA</text>
+                  </view>
+                  <view class="exp-sub" wx:if="{{it.sub}}">{{it.sub}}</view>
+                </view>
+                <view class="exp-right">
+                  <view class="exp-amount">{{it.amountText}}</view>
+                  <view class="exp-payer">{{it.payerName}}</view>
+                </view>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 列表空态 -->
+      <view class="empty-list" wx:if="{{groups.length === 0}}">
+        <view class="empty-emoji icon-receipt"></view>
+        <view class="empty-title">{{filterDate ? '这一天还没有花费' : '还没有记账记录'}}</view>
+        <button class="btn-main empty-btn" bindtap="openAdd" wx:if="{{!filterDate}}">记第一笔</button>
+      </view>
+    </block>
+
+    <!-- ===== 统计 ===== -->
+    <block wx:elif="{{activeTab === 'stats'}}">
+      <!-- Day 切换 -->
+      <scroll-view scroll-x class="day-scroll" wx:if="{{dayList.length > 1}}">
+        <view class="day-chip {{activeDay === d.value ? 'day-chip-on' : ''}}"
+              wx:for="{{dayList}}" wx:key="value" wx:for-item="d"
+              bindtap="selectDay" data-day="{{d.value}}">{{d.label}}</view>
+      </scroll-view>
+
+      <view class="panel-card">
+        <view class="stat-row">
+          <view class="stat-cell">
+            <view class="stat-num">{{statTotal}}</view>
+            <view class="stat-label">{{activeDay ? '当天花费' : '总花费'}}</view>
+          </view>
+          <view class="stat-cell">
+            <view class="stat-num">{{statMidValue}}</view>
+            <view class="stat-label">{{statMidLabel}}</view>
+          </view>
+          <view class="stat-cell">
+            <view class="stat-num">{{statCount}}</view>
+            <view class="stat-label">{{activeDay ? '当天笔数' : '笔数'}}</view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 预算卡（行程级，不随 Day 过滤） -->
+      <view class="panel-card">
+        <view class="card-head">
+          <view class="card-title">预算</view>
+          <view class="budget-set" bindtap="setBudget">{{budget > 0 ? '修改' : '设置预算'}}</view>
+        </view>
+        <block wx:if="{{budget > 0}}">
+          <view class="budget-bar">
+            <view class="budget-bar-inner {{overBudget ? 'bar-over' : ''}}" style="{{budgetBarStyle}}"></view>
+          </view>
+          <view class="budget-line">
+            <text>已花 {{totalText}} / 预算 {{budgetText}}</text>
+            <text class="{{overBudget ? 'text-over' : 'text-green'}}">{{overBudget ? '超支 ' + overText : '剩余 ' + remainText}}</text>
+          </view>
+          <view class="budget-warn" wx:if="{{nearBudget}}">⚠ 已用 {{budgetPercent}}%，快到预算上限啦</view>
+        </block>
+        <view class="budget-empty" wx:else>还没设预算，设置后帮你盯着花费</view>
+      </view>
+
+      <!-- 分类小计 + 分类预算 -->
+      <view class="panel-card">
+        <view class="card-head">
+          <view class="card-title">分类小计</view>
+          <view class="cat-hint" wx:if="{{activeDay}}">仅 {{activeDay}}</view>
+        </view>
+        <view class="cat-row" wx:for="{{statItems}}" wx:key="id">
+          <view class="cat-icon cat-{{item.id}}"></view>
+          <view class="cat-info">
+            <view class="cat-line">
+              <text class="cat-name">{{item.name}}</text>
+              <text class="cat-amount">{{item.amountText}}</text>
+            </view>
+            <view class="cat-bar">
+              <view class="cat-bar-inner {{item.barClass}}" style="{{item.barStyle}}"></view>
+            </view>
+            <view class="cat-percent">
+              <text>占比 {{item.percentText}}</text>
+              <text class="{{item.budgetCls}}" wx:if="{{item.budgetLine}}">{{item.budgetLine}}</text>
+            </view>
+          </view>
+          <view class="cat-budget-btn" catchtap="setCatBudget" data-id="{{item.id}}">预算</view>
+        </view>
+        <view class="budget-empty" wx:if="{{statItems.length === 0}}">{{activeDay ? '这一天还没有花费' : '还没有花费记录'}}</view>
+      </view>
+    </block>
+
+    <!-- ===== 结算 ===== -->
+    <block wx:else>
+      <!-- 出行成员（方案 A） -->
+      <view class="panel-card">
+        <view class="card-head">
+          <view class="card-title">出行成员</view>
+          <view class="budget-set" bindtap="openMembers">编辑成员</view>
+        </view>
+        <view class="member-chips">
+          <view class="member-chip" wx:for="{{members}}" wx:key="*this">{{item}}</view>
+        </view>
+        <view class="settle-note" wx:if="{{memberNames.length === 0}}">还没配置名单，当前按垫付过的人识别成员；点「编辑成员」录入全部同行伙伴更准确</view>
+      </view>
+
+      <view class="settle-empty" wx:if="{{settleEmpty}}">
+        <view class="empty-emoji icon-check-circle"></view>
+        <view class="empty-title">暂无需结算</view>
+        <view class="empty-desc">记一笔时打开「分摊结算」开关并选择垫付人与参与人，这里自动算出谁该转谁多少钱</view>
+      </view>
+
+      <block wx:else>
+        <!-- 成员净额 -->
+        <view class="panel-card">
+          <view class="card-head">
+            <view class="card-title">成员净额</view>
+            <view class="settle-members">{{memberCount}} 人 · {{settleCount}} 笔参与结算</view>
+          </view>
+          <view class="balance-row" wx:for="{{balances}}" wx:key="name" bindtap="toggleSettled" data-name="{{item.name}}">
+            <view class="balance-name">
+              {{item.name}}
+              <text class="settled-badge" wx:if="{{item.settled}}">✓ 已线下结清</text>
+            </view>
+            <view class="balance-val {{item.cls}}">{{item.text}}</view>
+          </view>
+          <view class="settle-note">净额 = 已垫付 − 应承担（按每笔参与人均摊）。点成员可标记/取消「已线下结清」；正数 = 别人欠你，负数 = 你欠别人。</view>
+        </view>
+
+        <!-- 转账方案 -->
+        <view class="panel-card">
+          <view class="card-head">
+            <view class="card-title">转账方案</view>
+            <view class="settle-members">{{transfers.length}} 笔结清</view>
+          </view>
+          <view class="transfer-row" wx:for="{{transfers}}" wx:key="index">
+            <text class="transfer-from">{{item.from}}</text>
+            <text class="transfer-arrow">→</text>
+            <text class="transfer-to">{{item.to}}</text>
+            <text class="transfer-amount">{{item.amountText}}</text>
+          </view>
+          <view class="settle-note" wx:if="{{transfers.length}}">已按「欠得最多的先还」自动配对，转账次数最少（不超过 人数−1 笔）；结清标记仅供记录，不影响金额；不足 1 分的尾差已自动分摊。</view>
+          <view class="budget-empty" wx:if="{{!transfers.length}}">各自结清，无需转账</view>
+        </view>
+      </block>
+    </block>
+  </block>
+
+  <!-- 记一笔浮动按钮 -->
+  <view class="fab" wx:if="{{hasTrip && !panelShow && !showMemberPanel}}" bindtap="openAdd">＋</view>
+
+  <!-- 记一笔 / 编辑 弹层 -->
+  <view class="mask {{panelShow ? 'mask-show' : ''}}" bindtap="closePanel" catchtouchmove="noop"></view>
+  <view class="panel {{panelShow ? 'panel-show' : ''}}" catchtouchmove="noop">
+    <view class="panel-head">
+      <view class="panel-title">{{editing ? '编辑花费' : '记一笔'}}</view>
+      <view class="copy-last" wx:if="{{!editing && hasLast}}" bindtap="copyLast">⧉ 复制上一笔</view>
+    </view>
+
+    <view class="amount-row">
+      <text class="amount-symbol">¥</text>
+      <input class="amount-input" type="digit" maxlength="10" placeholder="0.00"
+             value="{{form.amount}}" bindinput="onAmountInput" />
+    </view>
+
+    <!-- 分类九宫格（最近使用的 3 个置顶） -->
+    <view class="grid">
+      <view class="grid-cell" wx:for="{{gridCategories}}" wx:key="id" wx:for-item="c">
+        <view class="grid-inner {{form.categoryId === c.id ? 'cell-on' : ''}}"
+              bindtap="selectCategory" data-id="{{c.id}}">
+          <view class="cat-icon cat-{{c.id}}"></view>
+          <text class="grid-name">{{c.name}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="form-row">
+      <text class="form-label">日期</text>
+      <picker mode="date" value="{{form.date}}" end="{{today}}" bindchange="onFormDate">
+        <view class="form-value">{{form.date}}</view>
+      </picker>
+    </view>
+
+    <view class="form-row">
+      <text class="form-label">备注</text>
+      <input class="form-input" maxlength="30" placeholder="选填，最多 30 字"
+             value="{{form.note}}" bindinput="onNoteInput" />
+    </view>
+
+    <!-- 分摊结算开关：不勾 = 个人消费，不进结算 -->
+    <view class="form-row switch-row">
+      <text class="form-label">分摊结算</text>
+      <switch checked="{{form.needsSettle}}" color="#22C08A" bindchange="toggleSettle" />
+      <text class="switch-tip">{{form.needsSettle ? '多人 AA，计入结算' : '个人消费，不计入结算'}}</text>
+    </view>
+
+    <!-- 勾选分摊后才出现：付款人 + 参与人 -->
+    <block wx:if="{{form.needsSettle}}">
+      <view class="form-row">
+        <text class="form-label">垫付人</text>
+        <view class="payer-area">
+          <view class="payer-chip {{p.on ? 'payer-on' : ''}}"
+                wx:for="{{payerChips}}" wx:key="name" wx:for-item="p"
+                bindtap="selectPayer" data-name="{{p.name}}">{{p.name}}</view>
+          <input class="payer-input" placeholder="自定义" value="{{form.payerName}}" bindinput="onPayerInput" />
+        </view>
+      </view>
+
+      <view class="form-row">
+        <text class="form-label">参与人</text>
+        <view class="payer-area">
+          <view class="payer-chip {{p.on ? 'payer-on' : ''}}"
+                wx:for="{{participantChips}}" wx:key="name" wx:for-item="p"
+                bindtap="toggleParticipant" data-name="{{p.name}}">{{p.name}}</view>
+          <view class="payer-chip chip-add" bindtap="addParticipant">＋</view>
+        </view>
+      </view>
+      <view class="panel-hint">参与人默认全员，点名字可取消；点「＋」添加新的同行伙伴（自动同步到垫付人和结算成员）</view>
+    </block>
+
+    <view class="panel-btns">
+      <button class="btn-ghost" bindtap="closePanel">取消</button>
+      <button class="btn-ghost" wx:if="{{!editing}}" bindtap="saveAndAgain">保存并再记</button>
+      <button class="btn-main" bindtap="saveOne">{{editing ? '保存修改' : '保存'}}</button>
+    </view>
+  </view>
+
+  <!-- 成员编辑弹层 -->
+  <view class="mask mask-high {{showMemberPanel ? 'mask-show' : ''}}" bindtap="closeMembers" catchtouchmove="noop"></view>
+  <view class="panel panel-high {{showMemberPanel ? 'panel-show' : ''}}" catchtouchmove="noop">
+    <view class="panel-title">出行成员</view>
+    <view class="member-tip">除「我」以外的同行伙伴，用顿号、逗号或空格分隔，如：小明、小红、小刚、小丽</view>
+    <view class="member-input-row">
+      <textarea class="member-textarea" value="{{memberInput}}" bindinput="onMemberInput"
+                maxlength="200" auto-height placeholder="小明、小红、小刚、小丽"></textarea>
+    </view>
+    <view class="panel-btns">
+      <button class="btn-ghost" bindtap="closeMembers">取消</button>
+      <button class="btn-main" bindtap="saveMembers">保存成员</button>
+    </view>
+  </view>
+
+</view>

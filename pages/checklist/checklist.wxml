@@ -1,0 +1,85 @@
+<!-- pages/home/checklist/checklist.wxml -->
+<!-- TripMate · 清单工具（出行清单） -->
+<view class="cl-page">
+
+  <!-- 顶部进度卡 -->
+  <view class="cl-hero">
+    <view class="cl-hero-row">
+      <view>
+        <view class="cl-hero-title">出行清单</view>
+        <view class="cl-hero-sub">勾选打包进度，出发前一目了然</view>
+      </view>
+      <view class="cl-percent">{{percent}}<text class="cl-percent-unit">%</text></view>
+    </view>
+    <view class="cl-progress-track">
+      <view class="cl-progress-bar" style="width: {{percent}}%;"></view>
+    </view>
+    <view class="cl-progress-text">已备 {{doneCount}} / {{total}} 项</view>
+  </view>
+
+  <!-- 工具栏 -->
+  <view class="cl-toolbar">
+    <view class="cl-toolbar-tip">共 {{total}} 项</view>
+    <view class="cl-toolbar-actions">
+      <view class="cl-btn" bindtap="onResetTemplate">恢复默认</view>
+      <view class="cl-btn cl-btn-danger" bindtap="onClearDone">清空已完成</view>
+    </view>
+  </view>
+
+  <!-- 分组清单 -->
+  <view class="cl-group" wx:for="{{groups}}" wx:key="id" wx:for-item="g">
+    <view class="cl-group-head" bindtap="onToggleGroup" data-gid="{{g.id}}">
+      <view class="cl-arrow {{g.collapsed ? 'cl-arrow-collapsed' : ''}}">▾</view>
+      <view class="cl-group-title">{{g.title}}</view>
+      <view class="cl-group-count {{g.doneCount === g.items.length && g.items.length > 0 ? 'cl-group-count-done' : ''}}">
+        {{g.doneCount}}/{{g.items.length}}
+      </view>
+    </view>
+
+    <view class="cl-group-body" wx:if="{{!g.collapsed}}">
+      <view
+        class="cl-item"
+        wx:for="{{g.items}}"
+        wx:key="id"
+        wx:for-item="it"
+        bindtap="onToggleItem"
+        bindlongpress="onDeleteItem"
+        data-gid="{{g.id}}"
+        data-iid="{{it.id}}"
+      >
+        <view class="cl-checkbox {{it.done ? 'cl-checkbox-checked' : ''}}">
+          <text wx:if="{{it.done}}" class="cl-check-mark">✓</text>
+        </view>
+        <view class="cl-item-name {{it.done ? 'cl-item-name-done' : ''}}">{{it.name}}</view>
+      </view>
+      <view class="cl-group-empty" wx:if="{{g.items.length === 0}}">这一类还没有条目，在下方添加吧</view>
+    </view>
+  </view>
+
+  <!-- 空状态（全部删光时） -->
+  <view class="cl-empty" wx:if="{{!hasData}}">
+    <view class="cl-empty-icon icon-luggage"></view>
+    <view class="cl-empty-title">清单空空如也</view>
+    <view class="cl-empty-sub">点击右上角「恢复默认」一键生成出行模板</view>
+  </view>
+
+  <!-- 底部添加栏 -->
+  <view class="cl-add-bar">
+    <input
+      class="cl-input"
+      value="{{inputVal}}"
+      placeholder="添加要带的物品…"
+      placeholder-class="cl-input-placeholder"
+      confirm-type="done"
+      bindinput="onInput"
+      bindconfirm="onAddConfirm"
+    />
+    <picker mode="selector" range="{{groupNames}}" value="{{inputGroupIdx}}" bindchange="onPickGroup">
+      <view class="cl-add-group">{{groupNames[inputGroupIdx]}} ▾</view>
+    </picker>
+    <view class="cl-add-btn" bindtap="onAdd">添加</view>
+  </view>
+
+  <!-- 给固定底栏留出空间 -->
+  <view class="cl-bottom-space"></view>
+</view>

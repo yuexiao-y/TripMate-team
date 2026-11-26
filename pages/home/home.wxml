@@ -1,0 +1,74 @@
+
+<view class="nav" style="padding-top: {{statusBarHeight}}px;">
+  <view class="nav-bar" style="height: {{barHeight}}px;">
+    <text class="nav-title">TripMate</text>
+  </view>
+</view>
+<view style="height: {{navTotal}}px;"></view>
+
+<view class="hero">
+  
+  <view class="ha">
+    <view class="ha-art"></view>
+  </view>
+</view>
+
+<view class="page">
+  <!-- 智能行程规划入口 -->
+  <view class="ai-banner" hover-class="grid-hover" hover-stay-time="80" bindtap="goFeature" data-url="/pages/ai/ai">
+    <view class="ai-banner-left">
+      <view class="ai-banner-title">智能行程规划</view>
+    </view>
+    <view class="ai-banner-arrow">›</view>
+  </view>
+
+  <view class="stats">
+    <view class="stat">
+      <view class="stat-num">{{tripCount}}</view>
+      <view class="stat-label">行程</view>
+    </view>
+    <view class="stat-line"></view>
+    <view class="stat">
+      <view class="stat-num stat-money">{{totalExpense}}</view>
+      <view class="stat-label">总花费</view>
+    </view>
+    <view class="stat-line"></view>
+    <view class="stat">
+      <view class="stat-num">{{checkinCount}}</view>
+      <view class="stat-label">打卡</view>
+    </view>
+    <view class="stat-line"></view>
+    <view class="stat">
+      <view class="stat-num">{{doneCount}}<text class="stat-sub">/{{checkTotal}}</text></view>
+      <view class="stat-label">清单</view>
+    </view>
+  </view>
+
+  <view class="section-title"><view class="section-bar"></view>快速开始</view>
+  <view class="grid">
+    <view class="grid-item item-blue" hover-class="grid-hover" hover-stay-time="80" bindtap="goFeature" data-url="/pages/itinerary/itinerary">
+      <view class="icon-tile tile-blue"><view class="icon icon-itinerary"></view></view>
+      <view class="grid-text">行程</view>
+    </view>
+    <view class="grid-item item-green" hover-class="grid-hover" hover-stay-time="80" bindtap="goFeature" data-url="/pages/transport/transport">
+      <view class="icon-tile tile-green"><view class="icon icon-transport"></view></view>
+      <view class="grid-text">交通</view>
+    </view>
+    <view class="grid-item item-gold" hover-class="grid-hover" hover-stay-time="80" bindtap="goFeature" data-url="/pages/expense/expense">
+      <view class="icon-tile tile-gold"><view class="icon icon-expense"></view></view>
+      <view class="grid-text">记账</view>
+    </view>
+    <view class="grid-item item-orange" hover-class="grid-hover" hover-stay-time="80" bindtap="goFeature" data-url="/pages/dining/dining">
+      <view class="icon-tile tile-orange"><view class="icon icon-dining"></view></view>
+      <view class="grid-text">吃喝</view>
+    </view>
+    <view class="grid-item item-purple" hover-class="grid-hover" hover-stay-time="80" bindtap="goFeature" data-url="/pages/checkin/checkin">
+      <view class="icon-tile tile-purple"><view class="icon icon-checkin"></view></view>
+      <view class="grid-text">打卡</view>
+    </view>
+    <view class="grid-item item-pink" hover-class="grid-hover" hover-stay-time="80" bindtap="goFeature" data-url="/pages/checklist/checklist">
+      <view class="icon-tile tile-pink"><view class="icon icon-checklist"></view></view>
+      <view class="grid-text">清单</view>
+    </view>
+  </view>
+</view>

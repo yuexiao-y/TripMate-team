@@ -1,0 +1,14 @@
+{
+  "theme": "base",
+  "themeVariables": {
+    "fontSize": "18px",
+    "primaryColor": "#f2f2f2",
+    "primaryBorderColor": "#999999",
+    "primaryTextColor": "#333333",
+    "clusterBkg": "#fafafa",
+    "clusterBorder": "#bbbbbb",
+    "lineColor": "#666666",
+    "edgeLabelBackground": "#ffffff"
+  },
+  "flowchart": { "nodeSpacing": 24, "rankSpacing": 55 }
+}

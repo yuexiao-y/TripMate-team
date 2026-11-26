@@ -1,0 +1,141 @@
+<!--pages/transport/transport.wxml-->
+<view class="page">
+
+<view class="summary-card">
+  <view class="summary-row">
+    <view class="summary-item">
+      <view class="summary-num">{{totalCount}}</view>
+      <view class="summary-label">交通记录</view>
+    </view>
+    <view class="stat-line"></view>
+    <view class="summary-item">
+      <view class="summary-num">¥{{totalPrice}}</view>
+      <view class="summary-label">交通花费</view>
+    </view>
+  </view>
+  <view class="filter-bar" bindtap="openSheet" data-type="filter">
+    <text class="filter-label">筛选：{{filterNames[filterIndex]}}</text>
+    <text class="filter-arrow">▾</text>
+  </view>
+</view>
+
+<view class="empty" wx:if="{{transportList.length === 0}}">
+  <view class="empty-icon icon-bus"></view>
+  <view class="empty-text">暂无交通记录，点击右下角 ＋ 添加</view>
+</view>
+
+<view class="transport-card" wx:for="{{transportList}}" wx:key="id">
+  <view class="card-top">
+    <view class="type-badge">
+      <text class="type-label">{{item.mode}}</text>
+    </view>
+    <view class="price" wx:if="{{item.priceText}}">¥{{item.priceText}}</view>
+  </view>
+
+  <view class="route">
+    <view class="route-city">
+      <view class="city-name">{{item.from}}</view>
+      <view class="city-time">{{item.departText}}</view>
+    </view>
+    <view class="route-arrow">➜</view>
+    <view class="route-city right">
+      <view class="city-name">{{item.to}}</view>
+      <view class="city-time">{{item.arriveText}}</view>
+    </view>
+  </view>
+
+  <view class="card-bottom" wx:if="{{item.bookingNo}}">
+    <text class="booking-no">票号/订单号：{{item.bookingNo}}</text>
+  </view>
+</view>
+
+<view class="fab" bindtap="onAddTap">＋</view>
+
+<view class="mask" wx:if="{{showForm}}" bindtap="onCloseForm">
+  <view class="form-panel" catchtap="noop">
+    <view class="form-title">添加交通记录</view>
+    <scroll-view scroll-y class="form-scroll">
+
+      <view class="form-label">所属行程</view>
+      <view wx:if="{{tripNames.length > 0}}" class="form-picker" bindtap="openSheet" data-type="trip">{{tripNames[tripIndex]}}</view>
+      <view wx:else class="form-picker picker-empty" bindtap="onCloseForm">暂无行程，请先在首页创建行程</view>
+
+      <view class="form-label">交通方式</view>
+      <view class="form-picker" bindtap="openSheet" data-type="mode">{{modeOptions[modeIndex]}}</view>
+
+      <view class="form-row">
+        <view class="form-col">
+          <view class="form-label">出发地</view>
+          <input class="form-input" value="{{form.from}}" data-field="from" bindinput="onFormInput" placeholder="如 上海" placeholder-class="ph" />
+        </view>
+        <view class="form-col">
+          <view class="form-label">目的地</view>
+          <input class="form-input" value="{{form.to}}" data-field="to" bindinput="onFormInput" placeholder="如 成都" placeholder-class="ph" />
+        </view>
+      </view>
+
+      <view class="form-row">
+        <view class="form-col">
+          <view class="form-label">出发日期</view>
+          <picker mode="date" value="{{form.departDate}}" data-field="departDate" bindchange="onPickDate">
+            <view class="form-picker">{{form.departDate || '请选择'}}</view>
+          </picker>
+        </view>
+        <view class="form-col">
+          <view class="form-label">出发时间</view>
+          <picker mode="time" value="{{form.departTime}}" data-field="departTime" bindchange="onPickTime">
+            <view class="form-picker">{{form.departTime || '可选'}}</view>
+          </picker>
+        </view>
+      </view>
+
+      <view class="form-row">
+        <view class="form-col">
+          <view class="form-label">到达日期</view>
+          <picker mode="date" value="{{form.arriveDate}}" data-field="arriveDate" bindchange="onPickDate">
+            <view class="form-picker">{{form.arriveDate || '可选'}}</view>
+          </picker>
+        </view>
+        <view class="form-col">
+          <view class="form-label">到达时间</view>
+          <picker mode="time" value="{{form.arriveTime}}" data-field="arriveTime" bindchange="onPickTime">
+            <view class="form-picker">{{form.arriveTime || '可选'}}</view>
+          </picker>
+        </view>
+      </view>
+
+      <view class="form-row">
+        <view class="form-col">
+          <view class="form-label">价格（元）</view>
+          <input class="form-input" type="digit" value="{{form.price}}" data-field="price" bindinput="onFormInput" placeholder="如 560" placeholder-class="ph" />
+        </view>
+        <view class="form-col">
+          <view class="form-label">票号 / 订单号</view>
+          <input class="form-input" value="{{form.bookingNo}}" data-field="bookingNo" bindinput="onFormInput" placeholder="选填" placeholder-class="ph" />
+        </view>
+      </view>
+
+    </scroll-view>
+
+    <view class="form-actions">
+      <view class="btn ghost" bindtap="onCloseForm">取消</view>
+      <view class="btn primary" bindtap="onSubmitForm">保存</view>
+    </view>
+  </view>
+</view>
+
+<!-- 自绘选择抽屉（替代原生 picker，字号可控） -->
+<view class="sheet-mask" wx:if="{{sheetShow}}" bindtap="closeSheet"></view>
+<view class="sheet-panel" wx:if="{{sheetShow}}" catchtap="noop">
+  <view class="sheet-title">{{sheetTitle}}</view>
+  <scroll-view scroll-y class="sheet-list">
+    <view class="sheet-option {{sheetIndex === index ? 'opt-on' : ''}}"
+          wx:for="{{sheetOptions}}" wx:key="*this"
+          bindtap="onSheetPick" data-index="{{index}}">
+      <text>{{item}}</text>
+      <text class="opt-check" wx:if="{{sheetIndex === index}}">✓</text>
+    </view>
+  </scroll-view>
+</view>
+
+</view>

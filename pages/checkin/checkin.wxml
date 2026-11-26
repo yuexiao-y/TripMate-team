@@ -1,0 +1,78 @@
+<!-- 打卡记录页 -->
+<view class="page">
+  <view class="topbar">
+    <view class="topbar-title">打卡记录</view>
+  </view>
+
+  <!-- 顶部分区条：全部 / 各行程（没有行程时自动隐藏） -->
+  <scroll-view scroll-x class="filter-bar" wx:if="{{trips.length > 0}}">
+    <view class="chip {{filterId === '' ? 'chip-on' : ''}}" bindtap="onFilterTap" data-id="">全部</view>
+    <view class="chip {{filterId === item.id ? 'chip-on' : ''}}" wx:for="{{trips}}" wx:key="id" bindtap="onFilterTap" data-id="{{item.id}}">{{item.name}}</view>
+  </scroll-view>
+
+  <!-- 打卡缩略图网格：有照片显示照片，没照片显示标题首字 -->
+  <view class="grid" wx:if="{{items.length > 0}}">
+    <view class="card" wx:for="{{items}}" wx:key="id" bindtap="onCardTap" data-id="{{item.id}}">
+      <view class="thumb">
+        <image wx:if="{{item.cover}}" class="thumb-img" src="{{item.cover}}" mode="aspectFill" />
+        <view wx:else class="thumb-empty">{{item.initial}}</view>
+      </view>
+      <view class="card-title">{{item.title}}</view>
+      <view class="card-trip" wx:if="{{item.tripName}}">{{item.tripName}}</view>
+      <view class="card-date" wx:if="{{item.date}}">{{item.date}} {{item.time}}</view>
+      <view class="card-loc" wx:if="{{item.location}}">{{item.location}}</view>
+    </view>
+  </view>
+  <view wx:else class="empty">
+    <view>{{filterId ? '这个行程下还没有打卡' : '还没有打卡'}}</view>
+    <view class="empty-sub">{{filterId ? '点下方绿色按钮，给这个行程打卡' : '点下方绿色按钮，发布你的第一条打卡'}}</view>
+  </view>
+</view>
+
+<!-- 底部中央：新建打卡大按钮 -->
+<view class="fab-wrap" bindtap="openForm">
+  <view class="fab"><view class="fab-plus">＋</view></view>
+  <view class="fab-text">新建打卡</view>
+</view>
+
+<!-- 新建/编辑打卡弹层 -->
+<view class="mask" wx:if="{{showForm}}" bindtap="closeForm">
+  <view class="sheet" catchtap="noop">
+    <view class="sheet-title">{{editingId ? '编辑打卡' : '新建打卡'}}</view>
+    <scroll-view scroll-y class="form-scroll">
+      <input class="field" placeholder="标题（必填）" value="{{form.title}}" bindinput="onTitleInput" />
+      <textarea class="field ta" placeholder="写点什么（选填）" value="{{form.content}}" bindinput="onContentInput" maxlength="500" />
+
+      <view class="photo-row">
+        <view class="photo-box" wx:for="{{form.photos}}" wx:key="*this">
+          <image class="photo-img" src="{{item}}" mode="aspectFill" />
+          <view class="photo-del" catchtap="onPhotoRemove" data-index="{{index}}">✕</view>
+        </view>
+        <view class="photo-add" wx:if="{{form.photos.length < 9}}" bindtap="choosePhoto">＋</view>
+      </view>
+
+      <!-- 日期时间：默认当天当前时刻，可改 -->
+      <view class="dt-row">
+        <picker mode="date" value="{{form.date}}" bindchange="onDateChange">
+          <view class="field">日期：{{form.date}}</view>
+        </picker>
+        <picker mode="time" value="{{form.time}}" bindchange="onTimeChange">
+          <view class="field">时间：{{form.time}}</view>
+        </picker>
+      </view>
+
+      <view class="loc-row">
+        <input class="field loc-input" placeholder="位置（选填）" value="{{form.location}}" bindinput="onLocationInput" />
+        <view class="loc-btn" bindtap="getLocation">定位</view>
+      </view>
+
+      <!-- 所属行程：下拉可换归属（第一项 = 不归行程） -->
+      <picker mode="selector" range="{{tripNames}}" value="{{tripIndex}}" bindchange="onTripChange">
+        <view class="field">所属行程：{{tripNames[tripIndex]}}</view>
+      </picker>
+
+      <view class="sheet-btn {{canSubmit ? '' : 'btn-off'}}" bindtap="submit">{{editingId ? '保存修改' : '完成打卡'}}</view>
+      <view wx:if="{{editingId}}" class="sheet-del" bindtap="onDeleteCheckin">删除这条打卡</view>
+    </scroll-view>
+  </view>
+</view>

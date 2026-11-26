@@ -1,0 +1,25 @@
+{
+  "pages": [
+    "pages/home/home",
+    "pages/ai/ai",
+    "pages/index/index",
+    "pages/itinerary/itinerary",
+    "pages/transport/transport",
+    "pages/expense/expense",
+    "pages/dining/dining",
+    "pages/checkin/checkin",
+    "pages/checklist/checklist"
+  ],
+  "usingComponents": {
+    "card": "/components/card/card"
+  },
+  "window": {
+    "navigationBarTitleText": "TripMate",
+    "navigationBarBackgroundColor": "#FAF9F6",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#FAF9F6"
+  },
+  "style": "v2",
+  "requiredPrivateInfos": ["chooseLocation"],
+  "sitemapLocation": "sitemap.json"
+}

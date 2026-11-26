@@ -1,0 +1,42 @@
+%%{init: {"themeVariables": {"fontSize": "16px", "primaryColor": "#f2f2f2", "primaryBorderColor": "#999999", "clusterBkg": "#fafafa", "clusterBorder": "#bbbbbb", "lineColor": "#666666"}, "flowchart": {"nodeSpacing": 14, "rankSpacing": 40}}}%%
+flowchart LR
+    subgraph Facade[门面层]
+        HOME[home<br/>门户·统计·导航]
+    end
+
+    subgraph Modules[功能模块层 pages/*]
+        direction TB
+        AI[ai 智能规划]
+        ITI[itinerary 行程]
+        TRA[transport 交通]
+        EXP[expense 记账]
+        DIN[dining 吃喝]
+        CHK[checkin 打卡]
+        LIS[checklist 清单]
+    end
+
+    subgraph AIService[AI 双引擎（互为兜底）]
+        direction TB
+        CLOUD[ai-cloud<br/>云端混元·3s 限流]
+        LOCAL[agent-engine<br/>本地规则兜底]
+        DATA[agent-data<br/>预置演示数据]
+    end
+
+    subgraph Domain[领域层]
+        MODELS[models<br/>8 类实体定义]
+    end
+
+    subgraph Infra[基础设施层]
+        direction TB
+        STORE[store<br/>唯一持久化入口<br/>8 类 Storage]
+        FMT[format<br/>日期·金额]
+    end
+
+    HOME --> Modules
+    AI --> CLOUD
+    AI --> LOCAL
+    CLOUD -.失败回退.-> LOCAL
+    LOCAL --> DATA
+    Modules --> MODELS
+    MODELS --> STORE
+    Modules --> FMT

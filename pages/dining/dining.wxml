@@ -1,0 +1,100 @@
+<view class="page">
+  <view class="header">
+    <view class="header-top">
+      <text class="title">吃喝探索</text>
+      <text class="stats">已打卡 {{visitedCount}} / 想吃 {{wantCount}}</text>
+    </view>
+    <text class="subtitle">想吃的店，一家家去打卡</text>
+  </view>
+
+  <!-- 今天吃啥：随机抽签 -->
+  <view class="pick-card">
+    <view class="pick-head">
+      <text class="pick-title">今天吃啥？</text>
+      <text class="pick-sub">从没去过的店里随机抽一家</text>
+    </view>
+    <view class="pick-result" wx:if="{{todayPick}}">
+      <text class="pick-name">{{todayPick.name}}</text>
+      <text class="pick-meta">{{todayPick.type}} · 抽中了就去</text>
+    </view>
+    <view class="pick-empty" wx:else>
+      <text>还没有候选店，先在下面添加想吃的店吧</text>
+    </view>
+    <view class="pick-actions">
+      <button class="pick-btn main" size="mini" bindtap="randomPick">换一家</button>
+      <button class="pick-btn ghost" size="mini" bindtap="confirmPick" disabled="{{!todayPick}}">就去这家</button>
+    </view>
+  </view>
+
+  <!-- 类型筛选 -->
+  <scroll-view class="chips" scroll-x>
+    <view
+      class="chip {{filterIndex === index ? 'chip-on' : ''}}"
+      wx:for="{{filters}}"
+      wx:key="*this"
+      bindtap="onFilterChange"
+      data-index="{{index}}"
+    >{{item}}</view>
+  </scroll-view>
+
+  <!-- 我的店铺列表 -->
+  <view class="shop-list">
+    <view class="empty" wx:if="{{shownList.length === 0}}">
+      <text>这个分类还没有店，换个分类或添加一家吧</text>
+    </view>
+
+    <view class="shop-card {{item.visited ? 'visited' : ''}}" wx:for="{{shownList}}" wx:key="id">
+      <view class="shop-main">
+        <view class="shop-top">
+          <text class="shop-name">{{item.name}}</text>
+          <text class="shop-type">{{item.type}}</text>
+        </view>
+        <text class="shop-address" wx:if="{{item.address}}">{{item.address}}</text>
+        <view class="visited-badge" wx:if="{{item.visited}}">
+          <text>去过 ✓</text>
+        </view>
+      </view>
+      <button
+        class="visited-btn {{item.visited ? 'on' : ''}}"
+        size="mini"
+        bindtap="toggleVisited"
+        data-id="{{item.id}}"
+      >{{item.visited ? '没去过' : '去过'}}</button>
+    </view>
+  </view>
+
+  <!-- 添加想吃的店 -->
+  <view class="form">
+    <view class="form-title">添加想吃的店</view>
+    <input class="input" placeholder="店名（必填）" value="{{name}}" bindinput="onNameInput" />
+    <input class="input" placeholder="地址（选填）" value="{{address}}" bindinput="onAddressInput" />
+    <picker mode="selector" range="{{types}}" value="{{typeIndex}}" bindchange="onTypeChange">
+      <view class="picker">
+        <text class="picker-label">类型</text>
+        <text class="picker-value">{{types[typeIndex]}}</text>
+      </view>
+    </picker>
+    <button class="add-btn" bindtap="addShop">＋ 添加</button>
+  </view>
+
+  <!-- 灵感发现 -->
+  <view class="ideas">
+    <view class="ideas-title">灵感发现<text class="ideas-sub">示例数据 · 点「想吃」收进清单</text></view>
+    <view class="empty" wx:if="{{ideas.length === 0}}">
+      <text>示例店都收进清单啦，真棒</text>
+    </view>
+    <view class="idea-card" wx:for="{{ideas}}" wx:key="name">
+      <view class="idea-main">
+        <view class="shop-top">
+          <text class="shop-name">{{item.name}}</text>
+          <text class="shop-type">{{item.type}}</text>
+        </view>
+        <text class="idea-meta">{{item.address}} · {{item.rating}} 分</text>
+      </view>
+      <button class="idea-add" size="mini" bindtap="addIdea" data-name="{{item.name}}">＋ 想吃</button>
+    </view>
+  </view>
+</view>
+
+
+

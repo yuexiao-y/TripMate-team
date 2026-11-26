@@ -1,0 +1,97 @@
+<!-- 列表态 -->
+<view class="page" wx:if="{{view === 'list'}}">
+  <view class="topbar">
+    <view class="topbar-title">行程规划</view>
+    <view class="topbar-right">
+      <view class="topbar-home" bindtap="goHome"></view>
+      <view class="topbar-btn" bindtap="openCreate">＋ 新建</view>
+    </view>
+  </view>
+
+  <block wx:if="{{trips.length > 0}}">
+    <view class="trip-card" wx:for="{{trips}}" wx:key="id" bindtap="openDetail" data-id="{{item.id}}">
+      <view class="trip-head">
+        <view class="trip-name">{{item.name}}</view>
+        <view class="trip-right"></view>
+        <view class="trip-status s-{{item.status}}">{{item.statusText}}</view>
+        <view class="trip-del" catchtap="onRemoveTrip" data-id="{{item.id}}">✕</view>
+      </view>
+      <view class="trip-date">{{item.startDate}} 至 {{item.endDate}} · 共 {{item.totalDays}} 天</view>
+    </view>
+  </block>
+  <view wx:else class="empty">还没有行程，点右上角「＋ 新建」开始规划</view>
+</view>
+
+<!-- 详情态 -->
+<view class="page" wx:else>
+  <view class="topbar">
+    <view class="topbar-back" bindtap="backToList">‹ 返回</view>
+    <view class="topbar-title">{{trip.name}}</view>
+    <view class="topbar-btn" bindtap="openAddSheet">＋ 日程</view>
+  </view>
+
+  <view class="info-card">
+    <view class="info-date">{{trip.startDate}} 至 {{trip.endDate}} · 共 {{trip.totalDays}} 天</view>
+    <view class="info-row">
+      <view class="info-cell"><view class="info-num">{{dayCount}}</view><view class="info-label">日程</view></view>
+      <view class="info-cell"><view class="info-num">¥{{expenseTotal}}</view><view class="info-label">已记账</view></view>
+    </view>
+  </view>
+  <view class="complete-btn {{trip.completed ? 'complete-on' : ''}}" bindtap="toggleComplete">
+    {{trip.completed ? '取消完成标记' : '标记为已完成'}}
+  </view>
+
+  <block wx:if="{{groupedDays.length > 0}}">
+    <view class="day-group" wx:for="{{groupedDays}}" wx:for-item="day" wx:key="date">
+      <view class="day-title">{{day.label}}</view>
+      <view class="day-item" wx:for="{{day.items}}" wx:for-item="it" wx:key="id"
+            bindtap="onEditItem" bindlongpress="onDeleteItem" data-id="{{it.id}}">
+        <view class="item-icon">{{it.typeChar}}</view>
+        <view class="item-main">
+          <view class="item-title"><text class="item-time">{{it.time}}</text>{{it.title}}</view>
+          <view class="item-sub" wx:if="{{it.location}}">{{it.location}}</view>
+        </view>
+        <view class="item-type">{{it.type}}</view>
+        <view class="item-del" catchtap="onDeleteItem" data-id="{{it.id}}">✕</view>
+      </view>
+    </view>
+  </block>
+  <view wx:else class="empty">还没有日程，点右上角「＋ 日程」添加</view>
+</view>
+
+<!-- 新建行程弹层 -->
+<view class="mask" wx:if="{{showCreate}}" bindtap="closeCreate">
+  <view class="sheet" catchtap="noop">
+    <view class="sheet-title">新建行程</view>
+    <input class="field" placeholder="行程名称" value="{{form.name}}" bindinput="onNameInput" />
+    <picker mode="date" value="{{form.startDate || minDate}}" bindchange="onStartChange">
+      <view class="field">出发日期：{{form.startDate || '请选择'}}</view>
+    </picker>
+    <picker mode="date" value="{{form.endDate || form.startDate || minDate}}" bindchange="onEndChange">
+      <view class="field">返程日期：{{form.endDate || '请选择'}}</view>
+    </picker>
+    <view class="sheet-btn" bindtap="submitTrip">保存行程</view>
+  </view>
+</view>
+
+<!-- 添加/编辑日程弹层 -->
+<view class="mask" wx:if="{{showItem}}" bindtap="closeItem">
+  <view class="sheet" catchtap="noop">
+    <view class="sheet-title">{{editingId ? '编辑日程' : '添加日程'}}</view>
+    <picker mode="date" start="{{trip.startDate}}" end="{{trip.endDate}}" value="{{itemForm.date}}" bindchange="onItemDateChange">
+      <view class="field">日期：{{itemForm.date || '请选择'}}</view>
+    </picker>
+    <picker mode="time" value="{{itemForm.time}}" bindchange="onTimeChange">
+      <view class="field">时间：{{itemForm.time || '请选择'}}</view>
+    </picker>
+    <view class="chips">
+      <view class="chip {{itemForm.type === t ? 'chip-on' : ''}}" wx:for="{{types}}" wx:for-item="t" wx:key="*this"
+            bindtap="onTypeTap" data-type="{{t}}">{{t}}</view>
+    </view>
+    <input class="field" placeholder="做什么（必填）" value="{{itemForm.title}}" bindinput="onTitleInput" />
+    <input class="field" placeholder="地点（选填）" value="{{itemForm.location}}" bindinput="onLocInput" />
+    <input class="field" placeholder="备注（选填）" value="{{itemForm.note}}" bindinput="onNoteInput" />
+    <view class="sheet-btn" bindtap="submitItem">保存日程</view>
+    <view wx:if="{{editingId}}" class="sheet-del" bindtap="deleteCurrent">删除这条日程</view>
+  </view>
+</view>

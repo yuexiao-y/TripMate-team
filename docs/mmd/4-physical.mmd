@@ -1,0 +1,16 @@
+%%{init: {"themeVariables": {"fontSize": "18px", "primaryColor": "#f2f2f2", "primaryBorderColor": "#999999", "clusterBkg": "#fafafa", "clusterBorder": "#bbbbbb", "lineColor": "#666666"}, "flowchart": {"nodeSpacing": 24, "rankSpacing": 60}}}%%
+flowchart LR
+    subgraph Device[用户手机]
+        WXAPP[微信客户端<br/>TripMate 小程序<br/>本地 Storage：trips/expenses/<br/>checklist/checkins/dinings/<br/>transports/aiPlans/members_*]
+    end
+
+    subgraph WeChatCloud[微信云开发环境 cloud1-d6gsl3l0c7b1685f2]
+        AIGW[wx.cloud.extend.AI<br/>大模型接入网关]
+    end
+
+    subgraph Tencent[腾讯云]
+        HUNYUAN[[混元大模型<br/>hunyuan-v3 / hy3]]
+    end
+
+    WXAPP -- "wx.cloud.extend.AI.generate<br/>(鉴权由微信托管)" --> AIGW --> HUNYUAN
+    WXAPP -- "wx.chooseLocation" --> WXSVC[[微信位置服务]]

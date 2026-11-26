@@ -1,0 +1,233 @@
+<!-- ============ 输入态：欢迎 + 需求输入 ============ -->
+<view class="page" wx:if="{{view === 'input'}}">
+  <view class="hero">
+    <view class="hero-title">智能行程规划</view>
+    <view class="hero-sub">一句话，规划你的完整行程</view>
+  </view>
+
+  <view class="page-body">
+    <view class="mode-bar">
+      <view class="mode-seg {{mode === 'ai' ? 'on' : ''}}" hover-class="seg-hover"
+            bindtap="switchMode" data-mode="ai">智能管家（云端）</view>
+      <view class="mode-seg {{mode === 'local' ? 'on' : ''}}" hover-class="seg-hover"
+            bindtap="switchMode" data-mode="local">本地引擎</view>
+    </view>
+    <view class="mode-hint">{{modeHint}}</view>
+
+    <view class="input-card">
+      <view class="input-card-title">从哪出发，想去哪玩？</view>
+      <view class="input-card-example">例如：从武汉出发，我和两个朋友去上海玩三天，人均预算2000元，喜欢历史文化和美食。</view>
+      <textarea class="demand-input" value="{{inputText}}" bindinput="onInput" maxlength="200" auto-height
+                placeholder="从哪出发、去哪玩、玩几天、几个人、预算多少……一句话告诉我"></textarea>
+      <view class="start-btn" hover-class="btn-hover" bindtap="startPlan">开始智能规划</view>
+      <view class="history-btn" wx:if="{{hasHistory}}" bindtap="loadHistory">继续上次的方案 ›</view>
+    </view>
+
+    <view class="agent-tip" wx:if="{{agentTip}}">
+      <view class="agent-tip-tag">提示</view>
+      <view class="agent-tip-text">{{agentTip}}</view>
+    </view>
+
+    <view class="section-title"><view class="section-bar"></view>试试这些</view>
+    <view class="example-list">
+      <view class="example-item" wx:for="{{examples}}" wx:key="*this" hover-class="ex-hover"
+            bindtap="tapExample" data-text="{{item}}">{{item}}</view>
+    </view>
+  </view>
+</view>
+
+<!-- ============ 分析中：Agent 工作流可视化 ============ -->
+<view class="page" wx:elif="{{view === 'analyzing'}}">
+  <view class="analyze-card">
+    <view class="analyze-title">正在为你规划行程</view>
+    <view class="step-list">
+      <view class="step step-{{item.state}}" wx:for="{{steps}}" wx:key="label">
+        <view class="step-dot">{{item.state === 'done' ? '✓' : (item.state === 'active' ? '•' : '')}}</view>
+        <view class="step-label">{{item.label}}</view>
+      </view>
+    </view>
+    <view class="analyze-wait" wx:if="{{waitHint}}">{{waitHint}}</view>
+  </view>
+</view>
+
+<!-- ============ 结果态：完整旅行方案 ============ -->
+<block wx:else>
+  <view class="page result-page">
+    <view class="result-hero">
+      <view class="source-badge source-{{planView.source}}">智能规划</view>
+      <view class="result-title">{{planView.title}}</view>
+      <view class="result-sub">{{planView.sourceText}}</view>
+    </view>
+
+    <!-- 对话与修改记录 -->
+    <view class="card-block">
+      <view class="block-title"><view class="section-bar"></view>对话与修改</view>
+      <view class="chat-list">
+        <view class="msg msg-{{item.role}}" wx:for="{{chat}}" wx:key="index">
+          <view class="msg-bubble">{{item.text}}</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 已识别需求 -->
+    <view class="card-block">
+      <view class="block-title"><view class="section-bar"></view>已识别的旅行需求</view>
+      <view class="chip-grid">
+        <view class="chip-item" wx:for="{{planView.chips}}" wx:key="k">
+          <view class="chip-k">{{item.k}}</view>
+          <view class="chip-v">{{item.v}}</view>
+        </view>
+      </view>
+      <view class="assume" wx:if="{{planView.assumptions.length}}">
+        <view class="assume-title">规划假设</view>
+        <view class="assume-line" wx:for="{{planView.assumptions}}" wx:key="*this">· {{item}}</view>
+      </view>
+    </view>
+
+    <!-- 合理性检查 -->
+    <view class="card-block">
+      <view class="block-title"><view class="section-bar"></view>合理性检查</view>
+      <view class="check-line {{item.ok ? 'check-ok' : 'check-bad'}}" wx:for="{{planView.checks}}" wx:key="text">
+        {{item.ok ? '✓' : '⚠'}} {{item.text}}
+      </view>
+      <view class="check-line check-bad" wx:for="{{planView.warnings}}" wx:key="*this">⚠ {{item}}</view>
+    </view>
+
+    <!-- 每日行程 -->
+    <view class="card-block">
+      <view class="block-title"><view class="section-bar"></view>每日行程</view>
+      <view class="day-card" wx:for="{{planView.dayCards}}" wx:for-item="day" wx:key="day">
+        <view class="day-head">
+          <view class="day-num">Day {{day.day}}</view>
+          <view class="day-theme">{{day.theme}}</view>
+        </view>
+        <view class="tl-item" wx:for="{{day.items}}" wx:key="key"
+              hover-class="tl-hover" data-title="{{item.title}}" bindtap="onTapSpot">
+          <view class="tl-time">{{item.time}}</view>
+          <view class="tl-dot {{item.typeClass}}"></view>
+          <view class="tl-main">
+            <view class="tl-title-row">
+              <text class="tl-title">{{item.title}}</text>
+              <text class="tl-type">{{item.type}}</text>
+            </view>
+            <view class="tl-sub" wx:if="{{item.location}}">{{item.location}}</view>
+            <view class="tl-note" wx:if="{{item.note}}">{{item.note}}</view>
+            <view class="tl-meta">
+              <text class="tl-cost {{item.cost ? '' : 'cost-free'}}">{{item.cost ? '¥' + item.cost + '/人' : '免费'}}</text>
+              <text class="tl-stay" wx:if="{{item.stay && item.type === '景点'}}">停留约 {{item.stay}} 分钟</text>
+              <text class="tl-ai" wx:if="{{planView.source === 'cloud'}}">听讲解 ›</text>
+            </view>
+          </view>
+        </view>
+        <view class="day-remark" wx:if="{{day.remark}}">{{day.remark}}</view>
+      </view>
+    </view>
+
+    <!-- 交通安排 -->
+    <view class="card-block">
+      <view class="block-title"><view class="section-bar"></view>交通安排<text class="block-tag">示例数据</text></view>
+      <view class="t-group" wx:for="{{planView.tDays}}" wx:for-item="g" wx:key="day">
+        <view class="t-day">Day {{g.day}}</view>
+        <view class="t-leg" wx:for="{{g.legs}}" wx:key="index">
+          <view class="t-route">{{item.from}} → {{item.to}}</view>
+          <view class="t-info">{{item.mode}} · 约 {{item.minutes}} 分钟 · {{item.cost ? '¥' + item.cost : '免费'}}/人</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 美食推荐 -->
+    <view class="card-block">
+      <view class="block-title"><view class="section-bar"></view>美食推荐<text class="block-tag">示例数据</text></view>
+      <view class="d-group" wx:for="{{planView.dDays}}" wx:for-item="g" wx:key="day">
+        <view class="d-day">Day {{g.day}}</view>
+        <view class="d-item" wx:for="{{g.items}}" wx:key="index">
+          <view class="d-meal">{{item.meal}}</view>
+          <view class="d-main">
+            <view class="d-name">{{item.name}}</view>
+            <view class="d-sub" wx:if="{{item.note}}">{{item.note}}</view>
+          </view>
+          <view class="d-cost">¥{{item.cost}}/人</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 预算分析 -->
+    <view class="card-block">
+      <view class="block-title"><view class="section-bar"></view>预算分析</view>
+      <view class="b-row" wx:for="{{planView.budgetView.rows}}" wx:key="name">
+        <view class="b-name">{{item.name}}</view>
+        <view class="b-bar"><view class="b-fill" style="width: {{item.pct}}%;"></view></view>
+        <view class="b-val">¥{{item.val}}</view>
+      </view>
+      <view class="b-total">
+        <view class="b-total-line">预计总计 <text class="b-strong">¥{{planView.budgetView.total}}</text></view>
+        <block wx:if="{{planView.budgetView.totalBudget}}">
+          <view class="b-total-line">总预算 <text class="b-strong">¥{{planView.budgetView.totalBudget}}</text></view>
+          <view class="b-total-line {{planView.budgetView.over ? 'b-over' : 'b-remain'}}">
+            {{planView.budgetView.over ? '超出预算' : '预计剩余'}} <text class="b-strong">¥{{planView.budgetView.remain}}</text>
+          </view>
+        </block>
+      </view>
+      <view class="b-note" wx:for="{{planView.notes}}" wx:key="*this">· {{item}}</view>
+    </view>
+
+    <!-- 出行清单 -->
+    <view class="card-block">
+      <view class="block-title"><view class="section-bar"></view>出行清单<text class="block-tag">{{planView.checkDone}}/{{planView.checkTotal}}</text></view>
+      <view class="c-group" wx:for="{{planView.checkGroups}}" wx:for-item="g" wx:key="name">
+        <view class="c-group-name">{{g.name}}</view>
+        <view class="c-item" wx:for="{{g.items}}" wx:key="id" bindtap="toggleCheck" data-id="{{item.id}}">
+          <view class="c-box {{item.checked ? 'c-on' : ''}}">{{item.checked ? '✓' : ''}}</view>
+          <view class="c-text {{item.checked ? 'c-text-done' : ''}}">{{item.content}}</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 操作 -->
+    <view class="action-row">
+      <view class="save-btn {{planView.tripId ? 'saved' : ''}}" hover-class="btn-hover" bindtap="saveToTrip">
+        {{planView.tripId ? '已保存至行程规划 ✓' : '保存为正式行程'}}
+      </view>
+      <view class="view-btn" wx:if="{{planView.tripId}}" bindtap="goItinerary">去行程页查看</view>
+    </view>
+    <view class="restart-btn" bindtap="restart">重新开始</view>
+
+    <view class="bottom-space"></view>
+  </view>
+
+  <!-- 底部：自然语言修改输入条 -->
+  <view class="modify-bar">
+    <scroll-view class="quick-row" scroll-x enable-flex>
+      <view class="quick-chip" wx:for="{{quickModifies}}" wx:key="*this"
+            bindtap="tapQuickModify" data-text="{{item}}">{{item}}</view>
+    </scroll-view>
+    <view class="modify-row">
+      <input class="modify-input" value="{{modifyText}}" bindinput="onModifyInput"
+             placeholder="{{planView.source === 'cloud' ? '继续修改或直接提问：这个景点要预约吗？' : '继续修改，例如：第二天不要去博物馆'}}"
+             confirm-type="send" bindconfirm="sendModify" />
+      <view class="modify-send" hover-class="btn-hover" bindtap="sendModify">发送</view>
+    </view>
+  </view>
+
+  <!-- ===== AI 景点讲解弹层 ===== -->
+  <view class="spot-mask" wx:if="{{spotShow}}" bindtap="closeSpot"></view>
+  <view class="spot-panel {{spotShow ? 'spot-in' : ''}}" wx:if="{{spotShow}}">
+    <view class="spot-head">
+      <view class="spot-badge">讲解</view>
+      <view class="spot-title">{{spotTitle}}</view>
+      <view class="spot-close" bindtap="closeSpot">✕</view>
+    </view>
+    <scroll-view class="spot-body" scroll-y>
+      <view class="spot-loading" wx:if="{{spotLoading}}">
+        <view class="spot-dot"></view>正在为你准备讲解……
+      </view>
+      <view class="spot-text" wx:else>{{spotText || '暂时无法生成讲解。'}}</view>
+    </scroll-view>
+    <view class="spot-foot">
+      <view class="spot-speak {{spotSpeaking ? 'speaking' : ''}}" wx:if="{{speakOn && spotText && !spotLoading}}" hover-class="btn-hover" bindtap="onSpeakSpot">
+        {{spotSpeaking ? '■ 停止朗读' : '朗读讲解'}}
+      </view>
+      <view class="spot-copy" hover-class="btn-hover" bindtap="copySpot">复制讲解词</view>
+    </view>
+  </view>
+</block>

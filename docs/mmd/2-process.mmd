@@ -1,0 +1,22 @@
+%%{init: {"themeVariables": {"fontSize": "18px", "primaryColor": "#f2f2f2", "primaryBorderColor": "#999999", "clusterBkg": "#fafafa", "clusterBorder": "#bbbbbb", "lineColor": "#666666"}, "flowchart": {"nodeSpacing": 24, "rankSpacing": 60}}}%%
+flowchart LR
+    subgraph WP[微信小程序运行时（单进程·逻辑层 JS + 视图层 WXML）]
+        direction TB
+        subgraph Main[主逻辑流（事件驱动）]
+            EV[页面事件回调] --> STORE_W[store 读写<br/>同步 Storage]
+        end
+
+        subgraph AsyncTasks[异步任务点]
+            AICLOUD[AI 云端请求<br/>受限流阀门串行化<br/>间隔 ≥3s 防止 429]
+            AGENT[本地规则引擎<br/>同步纯函数]
+            FONT[字体加载<br/>onLaunch 异步]
+        end
+    end
+
+    subgraph WXCloud[微信云开发]
+        HUNYUAN[[混元大模型 API<br/>hunyuan-v3]]
+    end
+
+    AICLOUD -- HTTPS(微信托管) --> HUNYUAN
+    EV --> AICLOUD & AGENT
+    AICLOUD -- 失败/null --> AGENT
